@@ -19,14 +19,13 @@ Api.getInitialNews = (category) => {
 };
 
 Api.getNews = (category, max_behot_time) => {
-  const url = `https://www.toutiao.com/api/pc/feed/?max_behot_time=${max_behot_time}&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00501CXguywAAIDCg-H.s.78X9glxb-AAGlU0BDIWff-LA4BBqcnbbqbRIYm9Gb26zok2PX.H6YkX4h72rVca4r-G-SWBiAnKQywtVdRj.dObpo8e-MyMGOPV9m2NzMBaaoAYOu468"`;
-  //   const url = `https://www.toutiao.com/api/pc/feed/?max_behot_time=${max_behot_time}&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00d01u1XI1wAAIDDmNkPd1V4nULtcifAANttsCmDKI3eKPfTsbSJ6Ji2dGTQnwdkp8iy3v9biDb8Wb6kXSIrptpnCId.xY9ep1fO3wtomXiyvgb2DpnjwFYkktaL5HlpshM-DCKia6`;
-  console.log(url);
+  const url = `https://www.toutiao.com/api/pc/feed/?max_behot_time=${max_behot_time}&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00501JRfv7QAAIDDT1pD8yhowbCUersAAEUz6nyKYDdmkr1FQZx0sOgCRu3KUd0Eqx6eRbT4xnakqOZSC2acM67ul-r2csoyJygNlKVBkuS3C0TE4Y44hyEN2EXRqhTVRS3q1Ld57d`;
+
   return axios(url, {
     credentials: "include",
     headers: {
       "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0",
       Accept: "application/json, text/plain, */*",
       "Accept-Language": "en-US,en;q=0.5",
     },
