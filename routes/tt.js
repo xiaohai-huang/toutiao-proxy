@@ -47,9 +47,8 @@ router.get("/news", async function (req, res, next) {
   });
 });
 
-router.get("/news/:category", async function (req, res, next) {
-  let { category } = req.params;
-  const { max_behot_time } = req.query;
+router.get("/news/findByCategory", async function (req, res, next) {
+  let { category, max_behot_time } = req.query;
 
   // category is not specified, fallback to __all__
   if (!categories[category]) {
@@ -66,6 +65,23 @@ router.get("/news/:category", async function (req, res, next) {
     });
   }
 });
+
+router.get("/news/:newsId", function (req, res) {
+  const { newsId } = req.params;
+  return Api.getNewsById(newsId).then((news) => {
+    res.json(news);
+  });
+});
+
+router.get("/comments/:newsId", function (req, res) {
+  const { newsId } = req.params;
+  const { offset } = req.query;
+  return Api.getNewsCommentsById(newsId, offset).then((comments) => {
+    res.json(comments);
+  });
+});
+
+router.get("/videos/search_words", function (req, res) {});
 
 module.exports = router;
 
