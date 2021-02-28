@@ -6,33 +6,43 @@ const ttAxios = axios.create({});
 let Api = {};
 
 Api.getInitialNews = (category) => {
-  const newsUrl = `https://www.toutiao.com/api/pc/feed/?min_behot_time=0&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00f01eGJDDAAAIDAlAcgGmRjvLXhrAiAABhZLz3kN1WAXgzidEIUQz9.x7RjYR.2l1Rj3-hK0D1o3V5qCsftnjal-G7RgMT9F4EKoctUWV9hz61fCXC0A1q-hTDG5QE6Y0Yuzi2Md3`;
-  console.log(newsUrl);
-  return ttAxios
-    .get(newsUrl, {
+  return axios(
+    `https://www.toutiao.com/api/pc/feed/?min_behot_time=0&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00f01ZKWs8AAAIDCSZNPhGgVOamSs7dAAASfSzg0K.WOLW57Bp2-xYZXzK-1gB2MJIucwnNzdJP7rnJ1xZjMUdFm2rPsi1Y5NtbZAXuZyIbS.UkyMPubMkPc7l.8dL5d7VWYYPeSef`,
+    {
+      credentials: "include",
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0",
+        Accept: "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.5",
       },
-    })
-    .then((res) => res.data);
+      referrer: "https://www.toutiao.com/ch/news_tech/",
+      method: "GET",
+      mode: "cors",
+    }
+  ).then((res) => res.data);
 };
 
 Api.getNews = (category, max_behot_time) => {
-  const url = `https://www.toutiao.com/api/pc/feed/?max_behot_time=${max_behot_time}&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00501JRfv7QAAIDDT1pD8yhowbCUersAAEUz6nyKYDdmkr1FQZx0sOgCRu3KUd0Eqx6eRbT4xnakqOZSC2acM67ul-r2csoyJygNlKVBkuS3C0TE4Y44hyEN2EXRqhTVRS3q1Ld57d`;
+  if (max_behot_time === "undefined") {
+    max_behot_time = 0;
+  }
 
-  return axios(url, {
-    credentials: "include",
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0",
-      Accept: "application/json, text/plain, */*",
-      "Accept-Language": "en-US,en;q=0.5",
-    },
-    referrer: "https://www.toutiao.com/",
-    method: "GET",
-    mode: "cors",
-  }).then((res) => res.data);
+  return axios(
+    `https://www.toutiao.com/api/pc/feed/?max_behot_time=${max_behot_time}&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00d01MMlYpQAAIDDGCCe0HZbnwTDAGYAAFD3NxTOoJdXFRpGEBR5Xi-8z7g5rOvUXjq9arRybjQw2ZWI8l6rCSMgpL5mqnG9yE1O9FwQZFoEbyt8fkwzR1ncalu-wGdGHAq93PlE1e`,
+    {
+      credentials: "include",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0",
+        Accept: "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.5",
+      },
+      referrer: "https://www.toutiao.com/",
+      method: "GET",
+      mode: "cors",
+    }
+  ).then((res) => res.data);
 };
 Api.getNewsById = (item_id) => {
   return axios(
@@ -56,6 +66,7 @@ Api.getNewsById = (item_id) => {
     .then((res) => res.data)
     .catch((err) => console.log(err));
 };
+
 Api.getNewsCommentsById = (item_id, offset = 0) => {
   if (!offset) {
     offset = 0;

@@ -55,7 +55,7 @@ router.get("/news/findByCategory", async function (req, res, next) {
     category = "__all__";
   }
   // retrieve top news
-  if (!max_behot_time) {
+  if (!max_behot_time || max_behot_time === "undefined") {
     api.getInitialNews(category).then((news) => res.json(news));
   } else {
     // retrieve news at the bottom (older ones).
