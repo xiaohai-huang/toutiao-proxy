@@ -4,13 +4,13 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 router.post("/users/register", function (req, res) {
-  // 1. retrieve email and password from req.body
-  const email = req.body.email;
+  // 1. retrieve username and password from req.body
+  const username = req.body.username;
   const password = req.body.password;
-  if (!email || !password) {
+  if (!username || !password) {
     res.status(400).json({
       error: true,
-      message: "Request body incomplete - email and password are required!",
+      message: "Request body incomplete - username and password are required!",
     });
     return;
   }
@@ -18,14 +18,14 @@ router.post("/users/register", function (req, res) {
   req.db
     .from("users")
     .select("*")
-    .where({ email })
+    .where({ username })
     .then((users) => {
       const queryUser = users[0];
       //    2.1 if the user does exist, return error message
       if (queryUser) {
         res
           .status(400)
-          .json({ error: true, message: "The email is already used!" });
+          .json({ error: true, message: "The username is already used!" });
         return;
       }
       //    2.2 if the user does not exist, insert it into the table
@@ -34,7 +34,7 @@ router.post("/users/register", function (req, res) {
         const hash = bcrypt.hashSync(password, saltRounds);
         req.db
           .from("users")
-          .insert({ email, hash })
+          .insert({ username, hash })
           .then(() => {
             res.status(201).json({ success: true, message: "User created!" });
           })
@@ -44,14 +44,14 @@ router.post("/users/register", function (req, res) {
 });
 
 router.post("/users/login", async function (req, res) {
-  // 1. retrieve email and password from req.body
+  // 1. retrieve username and password from req.body
   // verify body
-  const email = req.body.email;
+  const username = req.body.username;
   const password = req.body.password;
-  if (!email || !password) {
+  if (!username || !password) {
     res.status(400).json({
       error: true,
-      message: "Request body incomplete - email and password are required!",
+      message: "Request body incomplete - username and password are required!",
     });
     return;
   }
@@ -59,7 +59,7 @@ router.post("/users/login", async function (req, res) {
   req.db
     .from("users")
     .select("*")
-    .where({ email })
+    .where({ username })
     .then((users) => {
       const queryUser = users[0];
       //    2.1 if the user does exist,
@@ -69,7 +69,7 @@ router.post("/users/login", async function (req, res) {
       }
       //    2.2 if the user does not exist, return error message
       else {
-        throw new Error("Email does not exist!");
+        throw new Error("username does not exist!");
       }
     })
     .then((match) => {
@@ -80,7 +80,7 @@ router.post("/users/login", async function (req, res) {
         const expires_in = 60 * 60 * 24;
         const ms = 1000;
         const exp = Date.now() + expires_in * ms;
-        const token = jwt.sign({ email, exp }, secret_key);
+        const token = jwt.sign({ username, exp }, secret_key);
         res.status(200).json({
           toke_type: "Bearer",
           token,
@@ -89,7 +89,7 @@ router.post("/users/login", async function (req, res) {
       } else {
         res
           .status(500)
-          .json({ error: true, message: "Incorrect password or email!" });
+          .json({ error: true, message: "Incorrect password or username!" });
       }
     })
     .catch((error) => {
@@ -101,7 +101,7 @@ router.post("/users/login", async function (req, res) {
 // USERS table
 // CREATE TABLE users (
 // 	id INT NOT NULL AUTO_INCREMENT,
-// 	email VARCHAR(45) NOT NULL UNIQUE,
+// 	username VARCHAR(45) NOT NULL UNIQUE,
 //     hash VARCHAR(60) NOT NULL,
 //     PRIMARY KEY (id)
 // );
