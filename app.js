@@ -1,3 +1,4 @@
+require("dotenv").config();
 var createError = require("http-errors");
 var express = require("express");
 var cors = require("cors");
@@ -38,10 +39,11 @@ function paramsLogger(req, res, next) {
 
 app.use(paramsLogger);
 app.use("/", indexRouter);
+app.use("/tt/api", usersRouter);
 app.use("/tt", ttRouter);
+
 app.use("/api", cityRouter);
 app.use("/api", countryRouter);
-app.use("/api", usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

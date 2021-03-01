@@ -1,8 +1,6 @@
 const axios = require("axios");
 axios.default.withCredential = true;
 
-const ttAxios = axios.create({});
-
 let Api = {};
 
 Api.getInitialNews = (category) => {

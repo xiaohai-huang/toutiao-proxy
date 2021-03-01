@@ -37,7 +37,8 @@ router.post("/users/register", function (req, res) {
           .insert({ email, hash })
           .then(() => {
             res.status(201).json({ success: true, message: "User created!" });
-          });
+          })
+          .catch((err) => console.log(err));
       }
     });
 });
