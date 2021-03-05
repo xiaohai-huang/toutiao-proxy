@@ -47,8 +47,25 @@ router.get("/news", async function (req, res, next) {
   });
 });
 
+router.post("/news", function (req, res) {
+  const newNews = req.body;
+  newNews.item_id = Number(`${Date.now()}`.slice(0, 10));
+  newNews.behot_time = Number(`${Date.now()}`.slice(0, 10));
+
+  req.db
+    .from("news")
+    .insert({ ...newNews })
+    .then((r) => console.log(r))
+    .catch((err) => console.log(err));
+  res.json({ result: req.body });
+});
+
 router.get("/news/findByCategory", async function (req, res, next) {
   let { category, max_behot_time } = req.query;
+  if (category === "xiaohai") {
+    getPrivateNews(req).then((news) => res.json(news));
+    return;
+  }
 
   // category is not specified, fallback to __all__
   if (!categories[category]) {
@@ -83,31 +100,24 @@ router.get("/comments/:newsId", function (req, res) {
 
 router.get("/videos/search_words", function (req, res) {});
 
+function getPrivateNews(req) {
+  return req.db
+    .from("news")
+    .select("*")
+    .then((news) => ({ data: news }));
+}
+
 module.exports = router;
 
-// router.get("/newsDeprecated", async function (req, res, next) {
-//   const url = "https://www.toutiao.com/";
-//   const newsUrl =
-//     "https://www.toutiao.com/api/pc/feed/?min_behot_time=0&category=__all__&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00f01eGJDDAAAIDAlAcgGmRjvLXhrAiAABhZLz3kN1WAXgzidEIUQz9.x7RjYR.2l1Rj3-hK0D1o3V5qCsftnjal-G7RgMT9F4EKoctUWV9hz61fCXC0A1q-hTDG5QE6Y0Yuzi2Md3";
-//   const result = await request.get(url);
-
-//   const news = await request.get(newsUrl, {
-//     headers: {
-//       cookie: cookieJar.getCookieString(),
-//       "User-Agent":
-//         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0",
-//     },
-//   });
-
-//   const axiosNews = await axios.get(newsUrl, {
-//     headers: {
-//       "User-Agent":
-//         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0",
-//     },
-//   });
-
-//   res.json({
-//     cookie: cookieJar.getCookieString(url),
-//     news: axiosNews.data,
-//   });
-// });
+// CREATE TABLE news (
+// 	item_id INT NOT NULL AUTO_INCREMENT UNIQUE,
+//     article_genre VARCHAR(20) NOT NULL,
+//     single_mode BOOLEAN NOT NULL,
+//     title VARCHAR(200) NOT NULL,
+//     behot_time INT NOT NULL,
+//     source VARCHAR(100) NOT NULL,
+//     image_url TEXT,
+//     media_avatar_url TEXT,
+//     comments_count INT,
+//     PRIMARY KEY (item_id)
+// );
