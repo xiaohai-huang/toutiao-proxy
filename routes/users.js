@@ -88,13 +88,15 @@ router.post("/users/login", async function (req, res) {
         });
       } else {
         res
-          .status(500)
+          .status(401)
           .json({ error: true, message: "Incorrect password or username!" });
       }
     })
     .catch((error) => {
       // Todo: the status code should be refined!
-      res.status(400).json({ error: true, message: error.message });
+      res
+        .status(401)
+        .json({ error: true, message: "Incorrect password or username!" });
     });
 });
 
