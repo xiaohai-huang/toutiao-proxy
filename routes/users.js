@@ -7,6 +7,7 @@ router.post("/users/register", function (req, res) {
   // 1. retrieve username and password from req.body
   const username = req.body.username;
   const password = req.body.password;
+  const avatar_url = req.body.avatar_url;
   if (!username || !password) {
     res.status(400).json({
       error: true,
@@ -34,7 +35,7 @@ router.post("/users/register", function (req, res) {
         const hash = bcrypt.hashSync(password, saltRounds);
         req.db
           .from("users")
-          .insert({ username, hash })
+          .insert({ username, hash, avatar_url })
           .then(() => {
             res.status(201).json({ success: true, message: "User created!" });
           })
@@ -65,14 +66,20 @@ router.post("/users/login", async function (req, res) {
       //    2.1 if the user does exist,
       if (queryUser) {
         // verify the password
-        return bcrypt.compareSync(password, queryUser.hash);
+        return {
+          match: bcrypt.compareSync(password, queryUser.hash),
+          queryUser,
+        };
       }
       //    2.2 if the user does not exist, return error message
       else {
         throw new Error("username does not exist!");
       }
     })
-    .then((match) => {
+    .then((r) => {
+      const { match, queryUser } = r;
+      // console.log(r);
+      console.log(match);
       if (match) {
         // sign token to it
         // 1 day in s
@@ -85,6 +92,7 @@ router.post("/users/login", async function (req, res) {
           toke_type: "Bearer",
           token,
           expires_in,
+          avatar_url: queryUser.avatar_url,
         });
       } else {
         res
@@ -94,17 +102,11 @@ router.post("/users/login", async function (req, res) {
     })
     .catch((error) => {
       // Todo: the status code should be refined!
+      console.log(error);
       res
         .status(401)
         .json({ error: true, message: "Incorrect password or username!" });
     });
 });
 
-// USERS table
-// CREATE TABLE users (
-// 	id INT NOT NULL AUTO_INCREMENT,
-// 	username VARCHAR(45) NOT NULL UNIQUE,
-//     hash VARCHAR(60) NOT NULL,
-//     PRIMARY KEY (id)
-// );
 module.exports = router;
