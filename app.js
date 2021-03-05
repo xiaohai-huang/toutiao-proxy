@@ -17,6 +17,7 @@ const knex = require("knex")(options);
 var app = express();
 
 app.use(cors());
+app.use(express.json({ limit: "100mb" }));
 app.use((req, res, next) => {
   req.db = knex;
   next();

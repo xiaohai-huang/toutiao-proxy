@@ -1,8 +1,8 @@
-const { default: axios } = require("axios");
 var express = require("express");
 const Api = require("../api/Api");
 var router = express.Router();
 const api = require("../api/Api");
+const jwt = require("jsonwebtoken");
 
 const categories = {
   __all__: "推荐",
@@ -42,22 +42,9 @@ router.get("/weather", function (req, res, next) {
 
 // get initial news from all category
 router.get("/news", async function (req, res, next) {
-  Api.getInitialNews().then((news) => {
+  Api.getInitialNews("__all__").then((news) => {
     res.json(news);
   });
-});
-
-router.post("/news", function (req, res) {
-  const newNews = req.body;
-  newNews.item_id = Number(`${Date.now()}`.slice(0, 10));
-  newNews.behot_time = Number(`${Date.now()}`.slice(0, 10));
-
-  req.db
-    .from("news")
-    .insert({ ...newNews })
-    .then((r) => console.log(r))
-    .catch((err) => console.log(err));
-  res.json({ result: req.body });
 });
 
 router.get("/news/findByCategory", async function (req, res, next) {
@@ -83,8 +70,15 @@ router.get("/news/findByCategory", async function (req, res, next) {
   }
 });
 
-router.get("/news/:newsId", function (req, res) {
+router.get("/news/:newsId", async function (req, res) {
   const { newsId } = req.params;
+  // private news
+  const privateNews = await getPrivateNewsDetails(req, newsId);
+  if (privateNews.data) {
+    res.json(privateNews);
+    return;
+  }
+
   return Api.getNewsById(newsId).then((news) => {
     res.json(news);
   });
@@ -100,24 +94,120 @@ router.get("/comments/:newsId", function (req, res) {
 
 router.get("/videos/search_words", function (req, res) {});
 
-function getPrivateNews(req) {
-  return req.db
+router.post("/news", authorize, async function (req, res) {
+  const newNews = req.body;
+  newNews.item_id = Number(`${Date.now()}`.slice(0, 10));
+  newNews.behot_time = Number(`${Date.now()}`.slice(0, 10));
+  // retrived avatar_url of the author
+  const author_name = req.username;
+
+  newNews.source = author_name;
+
+  req.db
+    .from("news")
+    .insert({ ...newNews })
+    .then((r) => {
+      // send back the new article's id
+      res.status(201).json({ item_id: newNews.item_id });
+    })
+    .catch((err) => console.log(err));
+});
+
+async function getPrivateNews(req) {
+  const plain_news = await req.db
     .from("news")
     .select("*")
-    .then((news) => ({ data: news }));
+    .orderByRaw("behot_time DESC");
+  let complete_news = await plain_news.map(async (news) => {
+    const author = await req.db
+      .from("users")
+      .select("*")
+      .where({ username: news.source });
+
+    news.media_avatar_url = author[0]?.avatar_url;
+    return news;
+  });
+  complete_news = await Promise.all(complete_news);
+  // news.media_avatar_url = avatar_url;
+  // console.log(avatar_url);
+  return { data: complete_news };
+}
+
+async function getPrivateNewsDetails(req, id) {
+  let newsDetails = await req.db.from("news").where({ item_id: id });
+  newsDetails = newsDetails[0];
+  // not in private database
+  if (!newsDetails) {
+    return { data: null };
+  }
+  const user_info = await req.db
+    .from("users")
+    .where({ username: newsDetails.source });
+
+  const media_user = {
+    screen_name: user_info[0].username,
+    avatar_url: user_info[0].avatar_url,
+  };
+  // if no content found, return empty
+  newsDetails.media_user = media_user;
+  return { data: newsDetails };
+}
+
+// private route middleware
+function isValid(expireDate) {
+  return expireDate > Date.now();
+}
+
+function authorize(req, res, next) {
+  const authorization = req.headers.authorization;
+
+  // retrieve token
+  let token = null;
+  if (authorization && authorization.split(" ").length === 2) {
+    // valid input
+    token = authorization.split(" ")[1];
+  } else {
+    // invalid user
+    res.status(401).json({
+      error: true,
+      message: "Request header authorization format incorrect!",
+    });
+    return;
+  }
+
+  try {
+    const { exp, username } = jwt.verify(token, "a secret key");
+    // check if the token is still valid
+    if (isValid(exp)) {
+      // determine if the user exists in the table
+      req.db
+        .from("users")
+        .select("*")
+        .where({ username })
+        .then((users) => {
+          if (users.length !== 0) {
+            // permit the user to advance to the route
+            req.username = username;
+            next();
+          } else {
+            res.status(401).json({
+              error: true,
+              message: "Invalid user!",
+            });
+          }
+        });
+    } else {
+      res.status(401).json({
+        error: true,
+        message: "Token expired!",
+      });
+    }
+  } catch (err) {
+    res.status(401).json({
+      error: true,
+      message: "Invalid token",
+    });
+  }
 }
 
 module.exports = router;
-
-// CREATE TABLE news (
-// 	item_id INT NOT NULL AUTO_INCREMENT UNIQUE,
-//     article_genre VARCHAR(20) NOT NULL,
-//     single_mode BOOLEAN NOT NULL,
-//     title VARCHAR(200) NOT NULL,
-//     behot_time INT NOT NULL,
-//     source VARCHAR(100) NOT NULL,
-//     image_url TEXT,
-//     media_avatar_url TEXT,
-//     comments_count INT,
-//     PRIMARY KEY (item_id)
-// );
