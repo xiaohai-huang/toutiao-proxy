@@ -60,13 +60,23 @@ router.get("/news/findByCategory", async function (req, res, next) {
   }
   // retrieve top news
   if (!max_behot_time || max_behot_time === "undefined") {
-    api.getInitialNews(category).then((news) => res.json(news));
+    api
+      .getInitialNews(category)
+      .then((news) => res.json(news))
+      .catch((err) =>
+        res.json({ error: err, message: "Unable to fetch news" })
+      );
   } else {
     // retrieve news at the bottom (older ones).
 
-    api.getNews(category, max_behot_time).then((news) => {
-      res.json(news);
-    });
+    api
+      .getNews(category, max_behot_time)
+      .then((news) => {
+        res.json(news);
+      })
+      .catch((err) =>
+        res.json({ error: err, message: "Unable to fetch news" })
+      );
   }
 });
 
@@ -79,17 +89,27 @@ router.get("/news/:newsId", async function (req, res) {
     return;
   }
 
-  return Api.getNewsById(newsId).then((news) => {
-    res.json(news);
-  });
+  Api.getNewsById(newsId)
+    .then((news) => {
+      res.json(news);
+    })
+    .catch((err) => console.log(err));
+  return;
 });
 
 router.get("/comments/:newsId", function (req, res) {
   const { newsId } = req.params;
   const { offset } = req.query;
-  return Api.getNewsCommentsById(newsId, offset).then((comments) => {
-    res.json(comments);
-  });
+  Api.getNewsCommentsById(newsId, offset)
+    .then((comments) => {
+      res.json(comments);
+    })
+    .catch((err) =>
+      res
+        .status(404)
+        .json({ error: err, message: "Cannot find the news article." })
+    );
+  return;
 });
 
 router.get("/videos/search_words", function (req, res) {});
@@ -111,6 +131,78 @@ router.post("/news", authorize, async function (req, res) {
       res.status(201).json({ item_id: newNews.item_id });
     })
     .catch((err) => console.log(err));
+});
+
+// update news
+router.put("/news/:newsId", authorize, async function (req, res) {
+  const { newsId } = req.params;
+  let newsToInsert = req.body;
+
+  // check if the news exists in the db
+  const oldNews = await req.db
+    .from("news")
+    .select("*")
+    .where({ item_id: newsId })
+    .first();
+  // does not exist
+  if (!oldNews) {
+    res.status(404).json({
+      message: `The news with id:${newsId} does not exist.`,
+      error: true,
+    });
+    return;
+  }
+  // update the old news
+  req.db
+    .from("news")
+    .where({ item_id: newsId })
+    .update({ ...newsToInsert })
+    .then(() => {
+      res.status(200).json({
+        item_id: newsId,
+        message: `Successfully updated the news with id ${newsId}`,
+      });
+    })
+    .catch((err) =>
+      res.status(500).json({
+        error: true,
+        message: "Unable to perform the update, databse error" + err,
+      })
+    );
+});
+
+// delete news by id
+router.delete("/news/:newsId", authorize, async function (req, res) {
+  const { newsId } = req.params;
+
+  // check if the news exists in the db
+  const oldNews = await req.db
+    .from("news")
+    .select("*")
+    .where({ item_id: newsId })
+    .first();
+  // does not exist
+  if (!oldNews) {
+    res.status(400).json({
+      message: `News id:${newsId} is invalid.`,
+      error: true,
+    });
+    return;
+  }
+
+  // detle the news
+  req.db
+    .from("news")
+    .where({ item_id: newsId })
+    .del()
+    .then(() => {
+      res
+        .status(200)
+        .json({ message: `Successfully deleted the news with id ${newsId}` });
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err, message: "Database error" });
+    });
 });
 
 async function getPrivateNews(req) {
