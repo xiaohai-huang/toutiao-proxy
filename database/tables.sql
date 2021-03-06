@@ -1,4 +1,4 @@
-CREATE DATABASE toutiao;
+CREATE DATABASE toutiao CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE toutiao;
 CREATE TABLE users (
 	id INT NOT NULL AUTO_INCREMENT,
@@ -6,7 +6,7 @@ CREATE TABLE users (
     hash VARCHAR(128) NOT NULL,
     avatar_url LONGTEXT,
     PRIMARY KEY (id,username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE news (
 	item_id INT NOT NULL AUTO_INCREMENT UNIQUE,
@@ -20,5 +20,5 @@ CREATE TABLE news (
     comments_count INT DEFAULT 0,
     PRIMARY KEY (item_id),
     FOREIGN KEY (source) REFERENCES users(username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
 

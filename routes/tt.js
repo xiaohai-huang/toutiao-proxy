@@ -93,7 +93,7 @@ router.get("/news/:newsId", async function (req, res) {
     .then((news) => {
       res.json(news);
     })
-    .catch((err) => console.log(err));
+    .catch((err) => console.log("cannot get the news details by id" + newsId));
   return;
 });
 
