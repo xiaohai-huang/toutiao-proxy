@@ -227,11 +227,11 @@ async function getPrivateNews(req) {
 
 async function getPrivateNewsDetails(req, id) {
   let newsDetails = await req.db.from("news").where({ item_id: id }).first();
-  newsDetails.publish_time = id;
   // not in private database
   if (!newsDetails) {
     return { data: null };
   }
+  newsDetails.publish_time = id;
   const user_info = await req.db
     .from("users")
     .where({ username: newsDetails.source });
