@@ -106,8 +106,7 @@ router.get("/videos/:newsId", async function (req, res) {
     const url = `https://m.toutiaoimg.cn/i${newsId}/?w2atif=1&channel=video`;
     console.log(url);
     const browser = await puppeteer.launch({
-      headless: false,
-      args: ["--no-sandbox"],
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
     await page.emulate(iPhone);
