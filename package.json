@@ -22,6 +22,7 @@
     "mysql": "^2.18.1",
     "nodemon": "^2.0.7",
     "npm": "^7.5.3",
+    "puppeteer": "^8.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6"
   },

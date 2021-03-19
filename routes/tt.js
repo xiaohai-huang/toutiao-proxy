@@ -3,6 +3,7 @@ const Api = require("../api/Api");
 var router = express.Router();
 const api = require("../api/Api");
 const jwt = require("jsonwebtoken");
+const puppeteer = require("puppeteer");
 
 const categories = {
   __all__: "推荐",
@@ -95,6 +96,33 @@ router.get("/news/:newsId", async function (req, res) {
     })
     .catch((err) => console.log("cannot get the news details by id" + newsId));
   return;
+});
+
+router.get("/videos/:newsId", async function (req, res) {
+  const { newsId } = req.params;
+  const iPhone = puppeteer.devices["iPhone 6"];
+
+  (async () => {
+    const url = `https://m.toutiaoimg.cn/i${newsId}/?w2atif=1&channel=video`;
+    console.log(articleId);
+    console.log(url);
+    const browser = await puppeteer.launch({
+      headless: false,
+      args: ["--no-sandbox"],
+    });
+    const page = await browser.newPage();
+    await page.emulate(iPhone);
+
+    await page.goto(url);
+    await page.waitForSelector("video");
+    const video = await page.evaluate(() => {
+      const videoSrc = document.getElementsByTagName("video")[0]
+        .firstElementChild.src;
+      return videoSrc;
+    });
+    await res.json({ video: video });
+    await browser.close();
+  })();
 });
 
 router.get("/comments/:newsId", function (req, res) {
@@ -231,6 +259,7 @@ async function getPrivateNewsDetails(req, id) {
   if (!newsDetails) {
     return { data: null };
   }
+  // id === publish_time
   newsDetails.publish_time = id;
   const user_info = await req.db
     .from("users")
