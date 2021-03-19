@@ -104,7 +104,6 @@ router.get("/videos/:newsId", async function (req, res) {
 
   (async () => {
     const url = `https://m.toutiaoimg.cn/i${newsId}/?w2atif=1&channel=video`;
-    console.log(articleId);
     console.log(url);
     const browser = await puppeteer.launch({
       headless: false,
