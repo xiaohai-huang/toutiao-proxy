@@ -98,6 +98,65 @@ router.get("/news/:newsId", async function (req, res) {
   return;
 });
 
+router.get("/videos", async function (req, res) {
+  (async () => {
+    const browser = await puppeteer.launch({
+      userDataDir: "./cache",
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: "/usr/bin/chromium-browser",
+    });
+    const page = await browser.newPage();
+
+    // await page.setRequestInterception(true);
+    // page.on("request", (request) => {
+    //   if (request.resourceType() === "image") {
+    //     request.abort();
+    //   } else {
+    //     request.continue();
+    //   }
+    // });
+
+    await page.goto("https://www.ixigua.com/", {
+      waitUntil: "networkidle2",
+    });
+
+    const videos = await page.evaluate(() => {
+      const cards = Array.from(
+        document.querySelectorAll(
+          ".HorizontalFeedCard.HorizontalChannelBlockList__item"
+        )
+      );
+
+      const results = cards.map((card) => {
+        const v = {};
+        const author = {};
+        v.author = author;
+
+        v.item_id = card.querySelector("a").href.split("/").pop();
+        v.title = card.querySelector(".HorizontalFeedCard__title").innerText;
+        v.duration = card.querySelector("span").innerHTML;
+        const images = card.querySelectorAll("img");
+        v.image_url = images[0].src;
+        v.statistics = card.querySelector(
+          ".HorizontalFeedCard-accessories-bottomInfo__statistics"
+        ).innerText;
+
+        author.avatar_url = images[1].src;
+        author.name = card.querySelector(
+          ".HorizontalFeedCard__author-name"
+        ).innerText;
+
+        return v;
+      });
+
+      return results;
+    });
+    res.json(videos);
+    await browser.close();
+  })();
+});
+
 router.get("/videos/:newsId", async function (req, res) {
   const { newsId } = req.params;
   const iPhone = puppeteer.devices["iPhone 6"];
@@ -106,8 +165,10 @@ router.get("/videos/:newsId", async function (req, res) {
     const url = `https://m.toutiaoimg.cn/i${newsId}/?w2atif=1&channel=video`;
     console.log(url);
     const browser = await puppeteer.launch({
+      userDataDir: "./cache",
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: "/usr/bin/chromium-browser",
     });
     const page = await browser.newPage();
     await page.emulate(iPhone);
