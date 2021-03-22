@@ -107,33 +107,31 @@ router.get("/videos", async function (req, res) {
       executablePath: "/usr/bin/chromium-browser",
     });
     const page = await browser.newPage();
-
-    // await page.setRequestInterception(true);
-    // page.on("request", (request) => {
-    //   if (request.resourceType() === "image") {
-    //     request.abort();
-    //   } else {
-    //     request.continue();
-    //   }
-    // });
-
     await page.goto("https://www.ixigua.com/", {
-      waitUntil: "networkidle2",
+      waitUntil: "load",
     });
 
+    await page.waitForSelector("script#SSR_HYDRATED_DATA");
+
     const videos = await page.evaluate(() => {
+      const SSR_DATA =
+        window._SSR_HYDRATED_DATA.Home.shortVideoRecommend.channelFeed.Data;
+      const previewUrls = Array.from(SSR_DATA).map((feed) => {
+        return feed.data.preview_url;
+      });
       const cards = Array.from(
         document.querySelectorAll(
           ".HorizontalFeedCard.HorizontalChannelBlockList__item"
         )
       );
 
-      const results = cards.map((card) => {
+      const results = cards.map((card, i) => {
         const v = {};
         const author = {};
         v.author = author;
 
         v.item_id = card.querySelector("a").href.split("/").pop();
+        v.preview_url = previewUrls[i];
         v.title = card.querySelector(".HorizontalFeedCard__title").innerText;
         v.duration = card.querySelector("span").innerHTML;
         const images = card.querySelectorAll("img");
