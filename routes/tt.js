@@ -104,7 +104,7 @@ router.get("/videos", async function (req, res) {
       userDataDir: "./cache",
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
+      // executablePath: "/usr/bin/chromium-browser",
     });
     const page = await browser.newPage();
     await page.goto("https://www.ixigua.com/", {
@@ -164,9 +164,9 @@ router.get("/videos/:newsId", async function (req, res) {
     console.log(url);
     const browser = await puppeteer.launch({
       userDataDir: "./cache",
-      headless: true,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
+      // executablePath: "/usr/bin/chromium-browser",
     });
     const page = await browser.newPage();
     await page.emulate(iPhone);
