@@ -2,7 +2,7 @@ const axios = require("axios");
 axios.default.withCredential = true;
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
-
+const puppeteer = require("puppeteer");
 let Api = {};
 
 // Api.getInitialNews = (category) => {
@@ -72,6 +72,63 @@ Api.getNewsById = (item_id) => {
   )
     .then((res) => res.data)
     .catch((err) => console.log(err));
+};
+// curl
+Api.getVideoUrlById = async function (video_id) {
+  const url = await exec(`curl 'https://www.ixigua.com/api/public/videov2/brief/details?group_id=${video_id}' \
+  -H 'authority: www.ixigua.com' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'tt-anti-token: ' \
+  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36 Edg/89.0.774.63' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'referer: https://www.ixigua.com/embed/?group_id=${video_id}&autoplay=0&wid_try=1' \
+  -H 'accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7' \
+  -H 'cookie: MONITOR_WEB_ID=08ba8ce2-7ae9-4ca7-b286-768b36bb67bb; ttwid=1%7C4Sq4ClTk2TuXZrHMYMak2LaZIKO4AfMX6UQ1Bt071zg%7C1614514848%7C163163a1f5ccaec792b69a9525fb9c1e993f07db8963d4e5a515711478920169; ixigua-a-s=0; SEARCH_CARD_MODE=6934288451864888839_1' \
+  --compressed`);
+  let data = JSON.parse(url.stdout).data;
+  // console.log(data);
+
+  if (!Object.keys(data.videoResource).length) {
+    console.log("return empty string ");
+    return "";
+  }
+
+  let videoUrl = data.videoResource.normal.video_list.video_3.main_url;
+  let buffer = Buffer.from(videoUrl, "base64");
+  return buffer.toString("ascii");
+};
+
+Api.getVideoUrlByIdPuppeteer = async (video_id) => {
+  let url = `https://m.toutiaoimg.cn/i${video_id}/?w2atif=1&channel=video`;
+  // let url = `https://www.ixigua.com/${video_id}`;
+  const iPhone = puppeteer.devices["iPhone 6"];
+  console.log(url);
+  const browser = await puppeteer.launch({
+    userDataDir: "./cache",
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: "/usr/bin/chromium-browser",
+  });
+  const page = await browser.newPage();
+  await page.emulate(iPhone);
+
+  await page.goto(url);
+  await page.waitForSelector("video");
+  const video = await page.evaluate(() => {
+    // short video url
+    let videoSrc = document.getElementsByTagName("video")[0].src;
+    // for movie url
+    if (!videoSrc) {
+      videoSrc = document.getElementsByTagName("video")[0].firstElementChild
+        .src;
+    }
+
+    return videoSrc;
+  });
+  browser.close();
+  return video;
 };
 
 Api.getNewsCommentsById = (item_id, offset = 0) => {

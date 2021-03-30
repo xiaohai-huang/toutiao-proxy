@@ -157,30 +157,17 @@ router.get("/videos", async function (req, res) {
 
 router.get("/videos/:newsId", async function (req, res) {
   const { newsId } = req.params;
-  const iPhone = puppeteer.devices["iPhone 6"];
 
-  (async () => {
-    const url = `https://m.toutiaoimg.cn/i${newsId}/?w2atif=1&channel=video`;
-    console.log(url);
-    const browser = await puppeteer.launch({
-      userDataDir: "./cache",
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
-    });
-    const page = await browser.newPage();
-    await page.emulate(iPhone);
+  // use curl first
+  let video = await Api.getVideoUrlById(newsId);
+  if (video) {
+    console.log("cUrl success!");
+  } else {
+    console.log("use puppeteer to fetch video url");
+    video = await Api.getVideoUrlByIdPuppeteer(newsId);
+  }
 
-    await page.goto(url);
-    await page.waitForSelector("video");
-    const video = await page.evaluate(() => {
-      const videoSrc = document.getElementsByTagName("video")[0]
-        .firstElementChild.src;
-      return videoSrc;
-    });
-    await res.json({ video: video });
-    await browser.close();
-  })();
+  res.json({ video: video });
 });
 
 router.get("/comments/:newsId", function (req, res) {
