@@ -101,9 +101,8 @@ Api.getVideoUrlById = async function (video_id) {
 };
 
 Api.getVideoUrlByIdPuppeteer = async (video_id) => {
-  let url = `https://m.toutiaoimg.cn/i${video_id}/?w2atif=1&channel=video`;
-  // let url = `https://www.ixigua.com/${video_id}`;
-  const iPhone = puppeteer.devices["iPhone 6"];
+  //   let url = `https://m.toutiaoimg.cn/i${video_id}/?w2atif=1&channel=video`;
+  let url = `https://www.ixigua.com/${video_id}`;
   console.log(url);
   const browser = await puppeteer.launch({
     userDataDir: "./cache",
@@ -112,20 +111,33 @@ Api.getVideoUrlByIdPuppeteer = async (video_id) => {
     executablePath: "/usr/bin/chromium-browser",
   });
   const page = await browser.newPage();
-  await page.emulate(iPhone);
 
   await page.goto(url);
-  await page.waitForSelector("video");
+  // await page.waitForSelector("video");
   const video = await page.evaluate(() => {
-    // short video url
-    let videoSrc = document.getElementsByTagName("video")[0].src;
-    // for movie url
-    if (!videoSrc) {
-      videoSrc = document.getElementsByTagName("video")[0].firstElementChild
-        .src;
+    function findReactElement(node) {
+      for (var key in node) {
+        if (key.startsWith("__reactInternalInstance")) {
+          //   console.log(key);
+          return node[key];
+        }
+      }
+      return null;
     }
-
-    return videoSrc;
+    var layout = document.querySelector(".v3-app-layout__content");
+    var video = [...layout.querySelectorAll("div")].find((e) =>
+      e.className.includes("playerContainer__wrapper")
+    );
+    var videoResource;
+    try {
+      videoResource = findReactElement(video).memoizedProps.children[0].props
+        .videoResource.normal.video_list;
+    } catch {
+      // movie's props is not an array
+      videoResource = findReactElement(video).memoizedProps.children.props
+        .videoResource.normal.video_list;
+    }
+    return videoResource.video_3.main_url;
   });
   browser.close();
   return video;
