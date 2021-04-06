@@ -99,60 +99,7 @@ router.get("/news/:newsId", async function (req, res) {
 });
 
 router.get("/videos", async function (req, res) {
-  (async () => {
-    const browser = await puppeteer.launch({
-      userDataDir: "./cache",
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
-    });
-    const page = await browser.newPage();
-    await page.goto("https://www.ixigua.com/", {
-      waitUntil: "load",
-    });
-
-    await page.waitForSelector("script#SSR_HYDRATED_DATA");
-
-    const videos = await page.evaluate(() => {
-      const SSR_DATA =
-        window._SSR_HYDRATED_DATA.Home.shortVideoRecommend.channelFeed.Data;
-      const previewUrls = Array.from(SSR_DATA).map((feed) => {
-        return feed.data.preview_url;
-      });
-      const cards = Array.from(
-        document.querySelectorAll(
-          ".HorizontalFeedCard.HorizontalChannelBlockList__item"
-        )
-      );
-
-      const results = cards.map((card, i) => {
-        const v = {};
-        const author = {};
-        v.author = author;
-
-        v.item_id = card.querySelector("a").href.split("/").pop();
-        v.preview_url = previewUrls[i];
-        v.title = card.querySelector(".HorizontalFeedCard__title").innerText;
-        v.duration = card.querySelector("span").innerHTML;
-        const images = card.querySelectorAll("img");
-        v.image_url = images[0].src;
-        v.statistics = card.querySelector(
-          ".HorizontalFeedCard-accessories-bottomInfo__statistics"
-        ).innerText;
-
-        author.avatar_url = images[1].src;
-        author.name = card.querySelector(
-          ".HorizontalFeedCard__author-name"
-        ).innerText;
-
-        return v;
-      });
-
-      return results;
-    });
-    res.json(videos);
-    await browser.close();
-  })();
+  Api.getVideos().then((videos) => res.json(videos));
 });
 
 router.get("/videos/:newsId", async function (req, res) {
