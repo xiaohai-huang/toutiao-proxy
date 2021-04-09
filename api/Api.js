@@ -74,12 +74,18 @@ Api.getNewsById = (item_id) => {
     .catch((err) => console.log(err));
 };
 Api.getVideos = async function (category) {
-  const browser = await puppeteer.launch({
-    userDataDir: "./cache",
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    executablePath: "/usr/bin/chromium-browser",
-  });
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      userDataDir: "./cache",
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: "/usr/bin/chromium-browser",
+    });
+  } catch (e) {
+    console.log("Unable to open puppeteer!");
+    return;
+  }
   const page = await browser.newPage();
   await page.goto("https://www.ixigua.com/", {
     waitUntil: "load",
@@ -175,16 +181,38 @@ Api.getVideoUrlById = async function (video_id) {
   return buffer.toString("ascii");
 };
 
+Api.getSearchResults = async (query, offset = 0) => {
+  query = encodeURI(query);
+  const curlString = `curl --location --request GET 'https://www.toutiao.com/api/search/content/?aid=24&app_name=web_search&offset=${offset}&format=json&keyword=${query}&autoload=true&count=20&en_qc=1&cur_tab=1&from=search_tab&pd=synthesis' \
+  --header 'Cookie: tt_webid=6932717554863801863'`;
+  // const curlString = `curl 'https://www.toutiao.com/api/search/content/?aid=24&app_name=web_search&offset=${offset}&format=json&keyword=${query}&autoload=true&count=20&en_qc=1&cur_tab=1&from=search_tab&pd=synthesis&timestamp=${Date.now()}&_signature=_02B4Z6wo00f01EXGpKwAAIDAR2FNBgD3tWBF46AAAHEmxojXKM7nyK.OuUaie9rQQGdqiiXnn-mMIB-Rl9P8wHK-ZICdhTlrFjCyX6O0ZFXVmvmsLZIzCCnIV4Kq1kUpSdphS5o9Bplk7Jmj55' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0' -H 'Accept: application/json, text/javascript' -H 'Accept-Language: en-US,en;q=0.5' --compressed -H 'X-Requested-With: XMLHttpRequest' -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' -H 'Referer: https://www.toutiao.com/search/?keyword=${query}' -H 'Cookie: tt_webid=6932428093810492941; MONITOR_WEB_ID=6c5950a0-0534-4134-b991-c4c78646bc8f; csrftoken=61e2446e34a7c4322be05ba8cb8e5a92; tt_webid=6932428093810492941; ttcid=dd7046f16bd246ef99679f2ede9a899338; passport_csrf_token=e430036a3bcbcc9ef38d92cb85ecd745; passport_csrf_token_default=e430036a3bcbcc9ef38d92cb85ecd745; __ac_signature=_02B4Z6wo00f01N8cUUAAAIDDBBmtB3NAAkjfOVXAAFebiPSMUlNiiLcF9.cr-LBYf02ILiMmZIjFeD2jAL3Da4shTBkrpz8YVylUKXl6gdhKaUo0oncScZEMHuVg84cdxwn75veJ.7TJKzZBc0; __tasessionId=47uk0wrno1617884440356; s_v_web_id=verify_kn8umfvk_lmy28d2u_MRlp_4jfx_9fer_KEUeXkvb63MO; tt_scid=kn1kzBKmgi6X14sskTxH5SQuMGwFaqslu0Efb1vMbpbvUQnCMhNpw5uepTgQtOr701ed' -H 'TE: Trailers'`;
+  let data;
+  try {
+    data = await exec(curlString);
+    data = JSON.parse(data.stdout).data;
+  } catch (error) {
+    console.log("unable to fetch search results");
+    data = [];
+  }
+  return data;
+};
+
 Api.getVideoUrlByIdPuppeteer = async (video_id) => {
   //   let url = `https://m.toutiaoimg.cn/i${video_id}/?w2atif=1&channel=video`;
   let url = `https://www.ixigua.com/${video_id}`;
   console.log(url);
-  const browser = await puppeteer.launch({
-    userDataDir: "./cache",
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    executablePath: "/usr/bin/chromium-browser",
-  });
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      userDataDir: "./cache",
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: "/usr/bin/chromium-browser",
+    });
+  } catch (e) {
+    console.log("Unable to open puppeteer!");
+    return;
+  }
   const page = await browser.newPage();
 
   await page.goto(url);

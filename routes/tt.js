@@ -81,6 +81,12 @@ router.get("/news/findByCategory", async function (req, res, next) {
   }
 });
 
+// search results
+router.get("/news/search", async function (req, res) {
+  const { search_query, offset } = req.query;
+  const results = await Api.getSearchResults(search_query, offset);
+  res.json(results);
+});
 router.get("/news/:newsId", async function (req, res) {
   const { newsId } = req.params;
   // private news
