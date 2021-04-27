@@ -5,28 +5,19 @@ const exec = promisify(require("child_process").exec);
 const puppeteer = require("puppeteer");
 let Api = {};
 
-// Api.getInitialNews = (category) => {
-//   return axios(
-//     `https://www.toutiao.com/api/pc/feed/?min_behot_time=0&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00f01ZKWs8AAAIDCSZNPhGgVOamSs7dAAASfSzg0K.WOLW57Bp2-xYZXzK-1gB2MJIucwnNzdJP7rnJ1xZjMUdFm2rPsi1Y5NtbZAXuZyIbS.UkyMPubMkPc7l.8dL5d7VWYYPeSef`,
-//     {
-//       credentials: "include",
-//       headers: {
-//         "User-Agent":
-//           "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0",
-//         Accept: "application/json, text/plain, */*",
-//         "Accept-Language": "en-US,en;q=0.5",
-//       },
-//       referrer: "https://www.toutiao.com/ch/news_tech/",
-//       method: "GET",
-//       mode: "cors",
-//     }
-//   ).then((res) => res.data);
-// };
 Api.getInitialNews = async function (category) {
-  const news = await exec(
-    `curl 'https://www.toutiao.com/api/pc/feed/?min_behot_time=0&category=${category}&utm_source=toutiao&widen=1&tadrequire=true&_signature=_02B4Z6wo00f01jBOEVgAAIDCMun48T6coyYwaxXAAOyAwvu5JQJMD7lMZmlQ1YLPucgM8Y7wXByCAakFSpO6kvzQRMNghk-viGDprLeDVUaa9zncHfoz9AIoV2AiKFSYp2bhHqzKImaKGWO866' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0' -H 'Accept: application/json, text/plain, */*' -H 'Accept-Language: en-US,en;q=0.5' --compressed -H 'Connection: keep-alive' -H 'Referer: https://www.toutiao.com/' -H 'Cookie: tt_webid=6932428093810492941; MONITOR_WEB_ID=0ac2db7b-8fc4-4e00-9856-f6df8bdbd79e; csrftoken=61e2446e34a7c4322be05ba8cb8e5a92; tt_webid=6932428093810492941; ttcid=dd7046f16bd246ef99679f2ede9a899338; passport_csrf_token=e430036a3bcbcc9ef38d92cb85ecd745; passport_csrf_token_default=e430036a3bcbcc9ef38d92cb85ecd745; __ac_signature=_02B4Z6wo00f01N8cUUAAAIDDBBmtB3NAAkjfOVXAAFebiPSMUlNiiLcF9.cr-LBYf02ILiMmZIjFeD2jAL3Da4shTBkrpz8YVylUKXl6gdhKaUo0oncScZEMHuVg84cdxwn75veJ.7TJKzZBc0; tt_scid=cl9Ppo91wU9Hd6562Jf5mwV.kdUjC1JdfqnVCIMIGJHYibJTznSAO7GO-m4zCx7k868e' -H 'TE: Trailers'`,
-    { encoding: "UTF-8" }
-  );
+  const curlString = `curl 'https://m.toutiao.com/list/?tag=${category}&ac=wap&count=20&format=json_raw&as=A1060057D2F915D&cp=6072E9C1359DDE1&min_behot_time=0&_signature=WBC0mQAAOGVrH-..57grJFgQtI&i=' \
+  -H 'Connection: keep-alive' \
+  -H 'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1' \
+  -H 'Accept: */*' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Referer: https://m.toutiao.com/?W2atIF=1' \
+  -H 'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6' \
+  -H 'Cookie: csrftoken=e640ede05aa0203f8e38672e28f0cd97; ttcid=3f48a1c3ca27433e96140f3fa58ca07321; tt_webid=6932717554863801863; _ga=GA1.2.961981832.1614307484; passport_csrf_token=27311c0e665716b2ce43a970836b5895; passport_csrf_token_default=27311c0e665716b2ce43a970836b5895; MONITOR_WEB_ID=118f4000-ba6e-42ce-92ec-364bddcc3f5a; tt_scid=-X.G5BKXuwkpz.m3.-FOzOF.OOu1l37YtGQ1zYxlTT42d5A8LyA7b28BC6nP99Kub37d; W2atIF=1; _gid=GA1.2.1885451154.1618121042; __tasessionId=pyyz65vaj1618121051293' \
+  --compressed`;
+  const news = await exec(curlString, { encoding: "UTF-8" });
   return JSON.parse(news.stdout);
 };
 
