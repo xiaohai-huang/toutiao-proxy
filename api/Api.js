@@ -78,6 +78,7 @@ Api.getVideos = async function (category) {
     return;
   }
   const page = await browser.newPage();
+  const moviePage = await browser.newPage();
 
   await page.setRequestInterception(true);
   page.on("request", (request) => {
@@ -96,6 +97,9 @@ Api.getVideos = async function (category) {
   });
 
   await page.goto("https://www.ixigua.com/", {
+    waitUntil: "networkidle0",
+  });
+  await moviePage.goto("https://www.ixigua.com/channel/dianying/", {
     waitUntil: "networkidle0",
   });
 
@@ -135,7 +139,8 @@ Api.getVideos = async function (category) {
     v.preview_url = previewUrls[i];
   });
 
-  const movies = await page.evaluate(() => {
+  await moviePage.screenshot({ path: "hh.jpg" });
+  const movies = await moviePage.evaluate(() => {
     function findReactElement(node) {
       for (var key in node) {
         if (key.startsWith("__reactInternalInstance")) {
