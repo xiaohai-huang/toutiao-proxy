@@ -87,18 +87,28 @@ Api.getVideos = async function (category) {
     return;
   }
   const page = await browser.newPage();
-  await page.goto("https://www.ixigua.com/", {
-    waitUntil: "load",
+
+  await page.setRequestInterception(true);
+  page.on("request", (request) => {
+    request.continue();
+  });
+  let previewUrls = [];
+  page.on("response", async (response) => {
+    if (response.url().includes("feedById")) {
+      const data = await response.json();
+      const videos = data.data.channelFeed.Data;
+      previewUrls = videos.map((v) => {
+        return v.data.preview_url;
+      });
+    }
+    // console.log("<<", response.status(), response.url());
   });
 
-  await page.waitForSelector("script#SSR_HYDRATED_DATA");
+  await page.goto("https://www.ixigua.com/", {
+    waitUntil: "networkidle0",
+  });
 
   const shortVideos = await page.evaluate(() => {
-    const SSR_DATA =
-      window._SSR_HYDRATED_DATA.Home.shortVideoRecommend.channelFeed.Data;
-    const previewUrls = Array.from(SSR_DATA).map((feed) => {
-      return feed.data.preview_url;
-    });
     const cards = Array.from(
       document.querySelectorAll(
         ".HorizontalFeedCard.HorizontalChannelBlockList__item"
@@ -111,7 +121,7 @@ Api.getVideos = async function (category) {
       v.author = author;
 
       v.item_id = card.querySelector("a").href.split("/").pop();
-      v.preview_url = previewUrls[i];
+
       v.title = card.querySelector(".HorizontalFeedCard__title").innerText;
       v.duration = card.querySelector("span").innerHTML;
       const images = card.querySelectorAll("img");
@@ -129,6 +139,9 @@ Api.getVideos = async function (category) {
     });
 
     return results;
+  });
+  shortVideos.forEach((v, i) => {
+    v.preview_url = previewUrls[i];
   });
 
   const movies = await page.evaluate(() => {
@@ -215,12 +228,10 @@ Api.getVideoUrlByIdPuppeteer = async (video_id) => {
   const page = await browser.newPage();
 
   await page.goto(url);
-  // await page.waitForSelector("video");
   const video = await page.evaluate(() => {
     function findReactElement(node) {
       for (var key in node) {
         if (key.startsWith("__reactInternalInstance")) {
-          //   console.log(key);
           return node[key];
         }
       }
