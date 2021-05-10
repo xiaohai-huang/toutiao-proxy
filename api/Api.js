@@ -89,7 +89,8 @@ Api.getVideos = async function (category) {
       const data = await response.json();
       const videos = data.data.channelFeed.Data;
       previewUrls = videos.map((v) => {
-        return v.data.preview_url;
+        console.log(v.data);
+        return v.data?.preview_url;
       });
     }
     // console.log("<<", response.status(), response.url());
