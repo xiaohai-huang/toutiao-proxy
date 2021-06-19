@@ -3,6 +3,7 @@ axios.default.withCredential = true;
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const puppeteer = require("puppeteer");
+const getShortVideos = require("../scrawl/getShortVideos");
 let Api = {};
 
 Api.getInitialNews = async function (category) {
@@ -71,7 +72,7 @@ Api.getVideos = async function (category) {
       userDataDir: "./cache",
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
+      // executablePath: "/usr/bin/chromium-browser",
     });
   } catch (e) {
     console.log("Unable to open puppeteer!");
@@ -89,7 +90,6 @@ Api.getVideos = async function (category) {
       const data = await response.json();
       const videos = data.data.channelFeed.Data;
       previewUrls = videos.map((v) => {
-        console.log(v.data);
         return v.data?.preview_url;
       });
     }
@@ -100,41 +100,7 @@ Api.getVideos = async function (category) {
     waitUntil: "networkidle0",
   });
 
-  const shortVideos = await page.evaluate(() => {
-    const cards = Array.from(
-      document.querySelectorAll(
-        ".HorizontalFeedCard.HorizontalChannelBlockList__item"
-      )
-    );
-
-    const results = cards.map((card, i) => {
-      const v = {};
-      const author = {};
-      v.author = author;
-
-      v.item_id = card.querySelector("a").href.split("/").pop();
-
-      v.title = card.querySelector(".HorizontalFeedCard__title").innerText;
-      v.duration = card.querySelector("span").innerHTML;
-      const images = card.querySelectorAll("img");
-      v.image_url = images[0].src;
-      v.statistics = card.querySelector(
-        ".HorizontalFeedCard-accessories-bottomInfo__statistics"
-      ).innerText;
-
-      author.avatar_url = images[1].src;
-      author.name = card.querySelector(
-        ".HorizontalFeedCard__author-name"
-      ).innerText;
-
-      return v;
-    });
-
-    return results;
-  });
-  shortVideos.forEach((v, i) => {
-    v.preview_url = previewUrls[i];
-  });
+  const shortVideos = await page.evaluate(getShortVideos);
 
   await page.waitForSelector(".icon-movie");
   await Promise.all([page.waitForNavigation(), page.click(".icon-movie")]);
@@ -158,7 +124,6 @@ Api.getVideos = async function (category) {
       const reactEl = findReactElement(movieNode);
       return reactEl.memoizedProps.children.props;
     });
-    console.log(results);
     return results;
   });
   await browser.close();
@@ -166,7 +131,8 @@ Api.getVideos = async function (category) {
 };
 // curl
 Api.getVideoUrlById = async function (video_id) {
-  const url = await exec(`curl 'https://www.ixigua.com/api/public/videov2/brief/details?group_id=${video_id}' \
+  const url =
+    await exec(`curl 'https://www.ixigua.com/api/public/videov2/brief/details?group_id=${video_id}' \
   -H 'authority: www.ixigua.com' \
   -H 'accept: application/json, text/plain, */*' \
   -H 'tt-anti-token: ' \
@@ -216,7 +182,7 @@ Api.getVideoUrlByIdPuppeteer = async (video_id) => {
       userDataDir: "./cache",
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
+      // executablePath: "/usr/bin/chromium-browser",
     });
   } catch (e) {
     console.log("Unable to open puppeteer!");
@@ -240,12 +206,14 @@ Api.getVideoUrlByIdPuppeteer = async (video_id) => {
     );
     var videoResource;
     try {
-      videoResource = findReactElement(video).memoizedProps.children[0].props
-        .videoResource.normal.video_list;
+      videoResource =
+        findReactElement(video).memoizedProps.children[0].props.videoResource
+          .normal.video_list;
     } catch {
       // movie's props is not an array
-      videoResource = findReactElement(video).memoizedProps.children.props
-        .videoResource.normal.video_list;
+      videoResource =
+        findReactElement(video).memoizedProps.children.props.videoResource
+          .normal.video_list;
     }
     return videoResource.video_3.main_url;
   });
