@@ -4,6 +4,7 @@ const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const puppeteer = require("puppeteer");
 const getShortVideos = require("../scrawl/getShortVideos");
+const getMovies = require("../scrawl/getMovies");
 let Api = {};
 
 Api.getInitialNews = async function (category) {
@@ -80,22 +81,6 @@ Api.getVideos = async function (category) {
   }
   const page = await browser.newPage();
 
-  await page.setRequestInterception(true);
-  page.on("request", (request) => {
-    request.continue();
-  });
-  let previewUrls = [];
-  page.on("response", async (response) => {
-    if (response.url().includes("feedById")) {
-      const data = await response.json();
-      const videos = data.data.channelFeed.Data;
-      previewUrls = videos.map((v) => {
-        return v.data?.preview_url;
-      });
-    }
-    // console.log("<<", response.status(), response.url());
-  });
-
   await page.goto("https://www.ixigua.com/", {
     waitUntil: "networkidle0",
   });
@@ -104,28 +89,9 @@ Api.getVideos = async function (category) {
 
   await page.waitForSelector(".icon-movie");
   await Promise.all([page.waitForNavigation(), page.click(".icon-movie")]);
-
   await page.waitForTimeout(3500);
 
-  const movies = await page.evaluate(() => {
-    function findReactElement(node) {
-      for (var key in node) {
-        if (key.startsWith("__reactInternalInstance")) {
-          //   console.log(key);
-          return node[key];
-        }
-      }
-      return null;
-    }
-    const movieList = [
-      ...document.querySelectorAll(".FeedContainer__itemWrapper"),
-    ].slice(0, 5);
-    const results = movieList.map((movieNode) => {
-      const reactEl = findReactElement(movieNode);
-      return reactEl.memoizedProps.children.props;
-    });
-    return results;
-  });
+  const movies = await page.evaluate(getMovies);
   await browser.close();
   return { shortVideos, movies };
 };
