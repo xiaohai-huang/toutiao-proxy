@@ -1,0 +1,201 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.0.0",
+    "title": "Toutiao API",
+    "description": "This API is created to provide news & videos data obtained from toutiao.com and ixigua.com",
+    "contact": { "email": "jeromehuang18@gmail.com" }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Enter JWT Bearer token **_only_**",
+        "name": "Authorization",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "ShortVideo": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "object",
+            "properties": {
+              "avatar_url": {
+                "type": "string",
+                "example": "https://p1.bdxiguaimg.com/img/user-avatar/0edf761d5de3e9468d9d9e12e18436d4~tplv-xg-center-qs:88:88:q75.webp"
+              },
+              "name": {
+                "type": "string",
+                "example": "平凡尼世界"
+              }
+            }
+          },
+          "item_id": {
+            "type": "string",
+            "example": "6937630852914348559"
+          },
+          "title": {
+            "type": "string",
+            "example": "孩子不在家，晚饭这菜有点奢侈了，其实是给老公加餐的"
+          },
+          "duration": {
+            "type": "string",
+            "example": "03:14"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://p9.bdxiguaimg.com/img/tos-cn-v-0026/7d17590dab6647f883c877021c7d008c~tplv-xg-center-qs:840:470:q75.webp"
+          },
+          "statistics": {
+            "type": "string",
+            "example": "7552次观看 · 3个月前"
+          },
+          "preview_url": {
+            "type": "string",
+            "example": "http://v9-xg-web-s.ixigua.com/7d62f1970abafbed4adddd5afa4324b6/60cdac47/video/tos/cn/tos-cn-v-0000c001/a9c7a01ec6de4c35aaaba20429521c60/?a=1768&br=465&bt=465&cd=0%7C0%7C0&ch=0&cr=0&cs=0&dr=0&ds=2&er=&l=02162408811556700000000000000000000ffff0aca358638e411&lr=&mime_type=video_mp4&net=0&pl=0&qs=13&rc=Mzc1anBya29pczMzM2c8M0ApNXQ7M3Nodjg8ZTMzNTpneWcvbjUtbWJwMjZfLS0vNGFzcy0xL2RqbGVpY20tLS1hNi06Yw%3D%3D&vl=&vr="
+          }
+        }
+      },
+      "Movie": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "笑功震武林"
+          },
+          "subTitle": {
+            "type": "string",
+            "example": "笑星集结智斗女特工"
+          },
+          "score": {
+            "type": "number",
+            "example": 4.5
+          },
+          "videoURL": {
+            "type": "string",
+            "example": "http://v9-xg-web-s.ixigua.com/c12ae62972a46b47af9b6e090d285810/60cddb0a/video/tos/cn/tos-cn-v-0000/81958a51049c41c5b2bca70085ec1015/?a=1768&br=780&bt=780&cd=0%7C0%7C0&ch=0&cr=2&cs=0&dr=2&ds=2&er=0&l=02162410007976500000000000000000000ffff0aca5c8f569e44&lr=&mime_type=video_mp4&net=0&pl=0&qs=13&rc=anJqNThzcHI5dTMzOGc8M0ApPHRyb2w8b2k4ZTMzZzpneWc2bmxpZjZpYzJfLS1hNGFzc2RsZC8ybWpsM28tLTJhNi06Yw%3D%3D&vl=&vr="
+          },
+          "anchorProps": {
+            "type": "object",
+            "properties": {
+              "href": {
+                "type": "string",
+                "example": "/6775739188152107533"
+              }
+            }
+          },
+          "coverURIConfig": {
+            "type": "object",
+            "properties": {
+              "uri": {
+                "type": "string",
+                "example": "xigua-lvideo-pic/82cb30d3ad3e0239a76b7add608fb503"
+              }
+            }
+          },
+          "richPreviewProps": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "example": "笑功震武林"
+              },
+              "year": {
+                "type": "string",
+                "example": "2012"
+              },
+              "intro": {
+                "type": "string",
+                "example": "民国初年，军阀混战，战祸四起，民不聊生。乱世之中，却为一群以骗术为生的老千们，提供了展露身手的舞台。\n黑帮老大林啸天从一名老千处得知日本人将给军阀王大帅十二箱金子作为军阀与北伐军抵抗的资金。为了得到这批金子，林啸天开始招兵买马，其中江湖中有千面人之称的老千“鬼脸”和“不动石佛”大老千成了林啸天首先拉拢的目标。\n谁知“鬼脸”与“石佛”竟然是不能见面的仇家，两人为了置对方于死地，展开了一场骗术的大较量，不料两人在这场较量中势均力敌。"
+              },
+              "coverURIConfig": {
+                "type": "object",
+                "properties": {
+                  "uri": {
+                    "type": "string",
+                    "example": "xigua-lvideo-pic/19922da3a3ff24fca134e9f3162ce5b1"
+                  }
+                }
+              },
+              "albumTypeValueList": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "example": [1]
+                }
+              },
+              "actorList": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": [
+                    "任贤齐",
+                    "腾格尔",
+                    "刘承俊",
+                    "熊乃瑾",
+                    "余思潞",
+                    "魏千翔",
+                    "李琛",
+                    "韩秋池"
+                  ]
+                }
+              },
+              "tagList": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": ["喜剧", "动作"]
+                }
+              },
+              "areaList": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": ["中国大陆"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "produces": ["application/json"],
+  "paths": {
+    "/tt/videos": {
+      "get": {
+        "tags": ["Video"],
+        "description": "Returns a list of short videos and movies.",
+        "responses": {
+          "200": {
+            "description": "An object which has two properties 'shortVideos' and 'movies'.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "shortVideos": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ShortVideo"
+                      }
+                    },
+                    "movies": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Movie"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

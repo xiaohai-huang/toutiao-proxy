@@ -1,11 +1,9 @@
-const { default: axios } = require("axios");
-var express = require("express");
-var router = express.Router();
+const router = require("express").Router();
+const swaggerUI = require("swagger-ui-express");
 
-router.get("/", function (req, res, next) {
-  axios("https://m.toutiao.com/related/hotboard/").then((response) => {
-    res.json({ data: response.data, deploy: "12.27am" });
-  });
-});
+const swaggerDocument = require("../docs/swagger.json");
+
+router.use("/", swaggerUI.serve);
+router.get("/", swaggerUI.setup(swaggerDocument));
 
 module.exports = router;
