@@ -90,10 +90,14 @@ router.get("/news/search", async function (req, res) {
 router.get("/news/:newsId", async function (req, res) {
   const { newsId } = req.params;
   // private news
-  const privateNews = await getPrivateNewsDetails(req, newsId);
-  if (privateNews.data) {
-    res.json(privateNews);
-    return;
+  try {
+    const privateNews = await getPrivateNewsDetails(req, newsId);
+    if (privateNews.data) {
+      res.json(privateNews);
+      return;
+    }
+  } catch (err) {
+    console.log("Cannot get private news");
   }
 
   Api.getNewsById(newsId)
