@@ -72,7 +72,7 @@ Api.getVideos = async function (category) {
       userDataDir: "./cache",
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      // executablePath: "/usr/bin/chromium-browser",
+      executablePath: "/usr/bin/chromium-browser",
     });
   } catch (e) {
     console.log("Unable to open puppeteer!");
@@ -182,7 +182,7 @@ Api.getVideoUrlByIdPuppeteer = async (video_id) => {
       userDataDir: "./cache",
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      // executablePath: "/usr/bin/chromium-browser",
+      executablePath: "/usr/bin/chromium-browser",
     });
   } catch (e) {
     console.log("Unable to open puppeteer!");
