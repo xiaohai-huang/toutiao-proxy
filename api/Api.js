@@ -192,7 +192,7 @@ Api.getNewsCommentsById = (item_id, offset = 0) => {
     offset = 0;
   }
   return axios(
-    `https://www.toutiao.com/article/v2/tab_comments/?aid=24&app_name=toutiao_web&offset=${offset}&count=5&group_id=${item_id}&item_id=${item_id}&_signature=_02B4Z6wo00f01aNkpiAAAIDCeGFaZL0tWCmjQaKAAAjkye8lFlRrOVV3SGCJsa8mFbNTPOomRPXgt744hXmF7mLivt-HOL1ViDo3a2miChKEQtDPNGMxW9D3l2Lc9LacIUvj08gR2e7p3q1Vb2`,
+    `https://www.toutiao.com/article/v2/tab_comments/?aid=24&app_name=toutiao_web&offset=${offset}&count=15&group_id=${item_id}&item_id=${item_id}&_signature=_02B4Z6wo00f01aNkpiAAAIDCeGFaZL0tWCmjQaKAAAjkye8lFlRrOVV3SGCJsa8mFbNTPOomRPXgt744hXmF7mLivt-HOL1ViDo3a2miChKEQtDPNGMxW9D3l2Lc9LacIUvj08gR2e7p3q1Vb2`,
     {
       credentials: "include",
       headers: {
@@ -206,7 +206,28 @@ Api.getNewsCommentsById = (item_id, offset = 0) => {
       mode: "cors",
     }
   )
-    .then((res) => res.data)
+    .then((res) => res.data.data)
+    .then((comments) => {
+      return comments.map((c) => {
+        const comment = c.comment;
+        const id = comment.id_str;
+        const text = comment.text;
+        const digg_count = comment.digg_count; // num likes
+        const reply_count = comment.reply_count;
+        const create_time = comment.create_time;
+        const user_name = comment.user_name;
+        const user_profile_image_url = comment.user_profile_image_url;
+        return {
+          id,
+          text,
+          digg_count,
+          reply_count,
+          create_time,
+          user_name,
+          user_profile_image_url,
+        };
+      });
+    })
     .catch((err) => console.log(err));
 };
 
