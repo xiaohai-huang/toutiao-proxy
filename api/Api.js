@@ -231,6 +231,42 @@ Api.getNewsCommentsById = (item_id, offset = 0) => {
     .catch((err) => console.log(err));
 };
 
+Api.getCommentReplyListById = (comment_id) => {
+  return axios(
+    `https://www.ixigua.com/tlb/comment/2/comment/v5/reply_list/?count=15&offset=0&aid=1768&id=${comment_id}`,
+    {
+      headers: {
+        accept: "application/json, text/plain, */*",
+        "accept-language": "en-US,en;q=0.9,en-AU;q=0.8",
+        "sec-ch-ua":
+          '" Not;A Brand";v="99", "Microsoft Edge";v="91", "Chromium";v="91"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "tt-anti-token": "",
+        cookie:
+          "MONITOR_WEB_ID=c721b439-113d-4aab-ba44-bc7170f509b4; ixigua-a-s=1; ttcid=2c2684f8033543e7bc69c6b4c51e323751; __ac_nonce=060cec605007812add95c; __ac_signature=_02B4Z6wo00f01PZhBmgAAIDCUGBC9myvj2j2RQLAAF1cc9; ttwid=1%7Cu_R8OInbbKLeKNPjcabC5v3Xia6HIYsN4OgCRPK1L08%7C1624163866%7C7c13f2b694b913a1b3a10030e070275241d1cb12b28601558678e727a7c4da6c",
+      },
+      referrerPolicy: "strict-origin-when-cross-origin",
+      body: null,
+      method: "GET",
+      mode: "cors",
+    }
+  )
+    .then((res) => res.data.data.data)
+    .then((comments) => {
+      return comments.map((comment) => {
+        const id = comment.id_str;
+        const text = comment.text;
+        const digg_count = comment.digg_count; // num likes
+        const user_name = comment.user.name;
+        const user_profile_image_url = comment.user.avatar_url;
+        return { id, text, digg_count, user_name, user_profile_image_url };
+      });
+    });
+};
+
 Api.getHotboards = () => {
   return axios("https://m.toutiao.com/related/hotboard/", {
     credentials: "include",

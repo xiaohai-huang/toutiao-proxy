@@ -142,6 +142,13 @@ router.get("/comments/:newsId", function (req, res) {
   return;
 });
 
+router.get("/reply_list/:commentId", function (req, res) {
+  const { commentId } = req.params;
+  Api.getCommentReplyListById(commentId).then((comments) => {
+    res.json(comments);
+  });
+});
+
 router.get("/videos/search_words", function (req, res) {});
 
 router.post("/news", authorize, async function (req, res) {
