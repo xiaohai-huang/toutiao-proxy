@@ -79,7 +79,7 @@ function getShortVideos() {
   var items = document.querySelector(".FeedContainer__items");
   items = findReactElement(items).memoizedProps.children[0];
   items = items.map((item) => {
-    const props = item.props.children.props;
+    const props = item.props.children[0].props.children.props;
     const item_id = item.key;
     // props
     const title = props.title;
