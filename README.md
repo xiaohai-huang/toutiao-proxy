@@ -3,7 +3,9 @@
 install dependencies
 
 ```bash
-npm install
-sudo apt-get update
-sudo apt-get install -y libgbm-dev
+docker run --name toutiao-proxy -it --rm -p 5000:3000 \
+            -v $(pwd):/app \
+            -v /app/node_modules \
+            toutiao-proxy-image
+
 ```
