@@ -72,8 +72,12 @@ Api.getVideos = async function (category) {
     browser = await puppeteer.launch({
       userDataDir: "./cache",
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
+      args: [
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+      ],
     });
   } catch (e) {
     console.log("Unable to open puppeteer!");
@@ -85,15 +89,21 @@ Api.getVideos = async function (category) {
     waitUntil: "networkidle0",
   });
 
+  await page.waitForSelector('.categoryPage_home__videoRecomment', {
+    visible: true,
+  });
+  await page.screenshot({ path: 'xigua.png' });
+
+
   const shortVideos = await page.evaluate(getShortVideos);
 
-  await page.waitForSelector(".icon-movie");
-  await Promise.all([page.waitForNavigation(), page.click(".icon-movie")]);
-  await page.waitForTimeout(3500);
+  // await page.waitForSelector(".icon-movie");
+  // await Promise.all([page.waitForNavigation(), page.click(".icon-movie")]);
+  // await page.waitForTimeout(3500);
 
-  const movies = await page.evaluate(getMovies);
+  // const movies = await page.evaluate(getMovies);
   await browser.close();
-  return { shortVideos, movies };
+  return { shortVideos, movies: [] };
 };
 // curl
 Api.getVideoUrlById = async function (video_id) {
@@ -147,8 +157,12 @@ Api.getVideoUrlByIdPuppeteer = async (video_id) => {
     browser = await puppeteer.launch({
       userDataDir: "./cache",
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: "/usr/bin/chromium-browser",
+      args: [
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+      ],
     });
   } catch (e) {
     console.log("Unable to open puppeteer!");

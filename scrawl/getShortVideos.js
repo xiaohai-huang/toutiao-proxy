@@ -76,8 +76,8 @@ function getShortVideos() {
     }
     return null;
   }
-  var items = document.querySelector(".FeedContainer__items");
-  items = findReactElement(items).memoizedProps.children[0];
+  var items = document.querySelector(".categoryPage_home__videoRecomment");
+  items = findReactElement(items).memoizedProps.children[1].props.children[0].props.children[0]
   items = items.map((item) => {
     const props = item.props.children[0].props.children.props;
     const item_id = item.key;
@@ -85,7 +85,7 @@ function getShortVideos() {
     const title = props.title;
     const author = getAuthor(props.authorInfo);
     const duration = formatSeconds(props.duration);
-    const image_url = getCoverImageUrl(props.coverURIConfig);
+    const image_url = props.coverURL;
     const statistics = getStat(props.video_watch_count, props.publish_time); // 7552次观看 · 3个月前
     const preview_url = props.videoURL;
     return {
